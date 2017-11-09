@@ -1,3 +1,9 @@
+//poner en el jugador 2 vs cpu restricciones en el color
+//ver como poner dificultad en otra parte
+//ver porque hay error al escribir una palabra
+//terminar ganador
+//terminar revisar
+//terminar AI
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -130,10 +136,10 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 	elegir[1][r]=0;
 	strcpy(jug->avatar,pieza[r]);
 	//pedir nombre
-	if(c[0]==1 || num==1){
+	if(c[0]==1 || num==2){ //ver como hacer para poner cpu en 1er lugar sin que haya error
 	    jug->num=num;//numero jugador
 		system("clear");
-		printf("\n\n\t\t\tJugador %d",num);
+		printf("\n\n\t\t\tJugador %d",jug->num);
         printf("\n\n\t!!Hola, antes de comenzar ayudame con lo siguiente: ");
 		printf("\n\n\tElige un nombre: ");
 		fflush(stdin);
@@ -142,17 +148,17 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		r=0;
 		while(!r){
 			for(i=0;i<3;i++)
-			if(elegir[0][i]){
-				if(i==0)
-					printf("\n\t1-Rojo");
-				if(i==1)
-					printf("\n\t2-Cyan");
-				if(i==2)
-					printf("\n\t3-Amarillo");
-			}
+			    if(elegir[0][i]){
+				    if(i==0)
+					    printf("\n\t1-Rojo");
+				    if(i==1)
+					    printf("\n\t2-Cyan");
+				    if(i==2)
+					    printf("\n\t3-Amarillo");
+			    }
 			printf("\n\t\t\tElige un color: ");
 			fflush(stdin);
-			scanf("%d",&r);
+			scanf("%i",&r);
 		    fflush(stdin);
 			if(r<1 || r>4 || !elegir[0][r-1]){
 				printf("\n\tOpción no valida, vuelve a intentarlo");
@@ -163,6 +169,7 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		elegir[0][r-1]=0;
 	}else{
         jug->num=NJ+1;
+        jug->dificultad=c[1];//ver forma de quitarla
 		strcpy(jug->nombre,"cpu");
 		do{
 			r=rand()%3+1;
@@ -263,7 +270,7 @@ void esperar(void){
 int ponerPieza(struct jugador jug,struct tablero tab){
     int columna=0;
     printf("\n\n\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.\n\n\t\tElige una columna: ",jug.color,jug.nombre,BLANCO);
-    scanf("%d",&columna);
+    scanf("%i",&columna);
     columna--;
     if(columna < -1 || columna >= NC){
         printf("\n\n\t\tEl numero que ingresaste no es ninguna columna, elige de nuevo.");
@@ -280,7 +287,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
     struct escanear escaneado;
     int dif=jug[n].dificultad;
     int col=-1;
-    if(jug[n].num==NJ+1)
+    if(jug[n].num==NJ+1){
         if(dif != 1){
             escaneado=revisarTab(jug,tab);
             if(escaneado.hay[0])
@@ -289,13 +296,16 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
                 col=escaneado.vacias[1][0][1];
             else if(dif==3){
                 revisarTab(jug,tab);
-                //hardcore extra
+                //hardcore extra primero poner en la col 3 revisando si el op tiene 2 seguidas de peligro.
                 col=0;
             }
-        }else
+        }
+        if(col==-1){
             do{
                 col=rand()%NC;
             }while(tab.cuentaFila[col]>=NF);
+        }
+    }
             printf("\n\n\n\n\n\n\n\n\n\n");
     return col;
 }
@@ -351,7 +361,7 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
         if(tab.cuentaFila[i]==NF)
             contador++;
     if(contador==NC){
-	    dibujarTabla(tab,jug);//meter esto en revisarGanador();
+	    dibujarTabla(tab,jug);
         printf("\n\n\tLo siento, ya se terminaron las oportunidades, juego empatado.");
         esperar();
         return 0;
