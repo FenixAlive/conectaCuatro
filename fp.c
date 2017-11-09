@@ -29,37 +29,37 @@ struct tablero{
 };
 //estructura escanear talero
 struct escanear{
- 	int nab; //numero a buscar
  	int hay[NJ]; //1 si hay alguna, 0 si no hay.
+ 	int nab[NJ]; //numero encontrado
  	int vacias[NJ][3][2]; //casillas vacias en el primer encuentro-f,c
  	int array[NF-N+1][NC-N+1][N][N];
 };
-
 //definicion de funciones
 int jugar(struct jugador jug[]); //funcion principal
-struct jugador iniciarjug(struct jugador *jug,int num, char pieza[NJ][7], int c[],int elegir[2][3]);//inicializa jugadores
-struct tablero iniciarTab(struct tablero *tab);
+struct jugador iniciarjug(struct jugador *jug,int num, char pieza[NJ][7], int c[],int elegir[2][NJ+1]);//inicializa jugadores
+void iniciarTab(struct tablero *tab);
 void instrucciones(void);
 int menu1(void);
 int menu2(void);
 void dibujarTabla(struct tablero tab, struct jugador jug[]);
 int ponerPieza(struct jugador jug, struct tablero tab);
-int ponerPiezaAI(struct jugador jug[], struct tablero tab);
-struct escanear revisarTab(struct jugador jug[], struct tablero tab, int numABuscar);
+int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n);
+struct escanear revisarTab(struct jugador jug[], struct tablero tab);
+int revisarGanador(struct jugador jug[],struct tablero tab, int n); 
 void esperar(void);
-///////Funciones
 
+///////Inicio
 //main
 int main(void){
 	srand(time(NULL));
 	struct jugador jug[NJ];
 	char pieza[NJ][7]={"x","o"};
-	int elegir[NJ][3];//color, pieza
+	int elegir[2][NJ+1];//color, pieza
 	int c[2]={0,0}, ytn[NJ]={0,0}, i=0,j=0;
 	do{
 		c[0]=menu1();
-		for(i=0;i<NJ;i++)  //para inicializar jugador 
-			for(j=0;j<3;j++) //para inicializar colores
+		for(i=0;i<2;i++)  //para inicializar jugador 
+			for(j=0;j<NJ+1;j++) //para inicializar colores
 				elegir[i][j]=1;
 		if(c[0]==1 || c[0]==2){
 			if(c[0]==2){
@@ -70,24 +70,24 @@ int main(void){
 					c[1]=menu2();
 				}//si me da un numero invalido en el menu
                 jug[1].dificultad=c[1];//guardar dificultad
+            }else{
+                c[1]=0;//estoy en 1 vs 2
             }//fin pedir menu 2
-			for(i=0;i<NJ;i++)
-				if(ytn[i] != c[0]){   //si no estan inicializados
-					iniciarjug(&jug[i],i+1,pieza, c,elegir);
-					ytn[i]=c[0];
-				}
 			if(c[1] != 4){
+			    for(i=0;i<NJ;i++)
+				    if(ytn[i] != c[0]){   //si no estan inicializados
+					    iniciarjug(&jug[i],i+1,pieza, c,elegir);
+					    ytn[i]=c[0];
+				    }
 				jugar(jug);
 			}
 		}else if(c[0]==3)
 			instrucciones();
-		else if(c[0]==4)
-			c[0]=0;
-		else{
+		else if(c[0] != 4){
 			printf("\n\t\t\tOpción no valida, vuelva a intentarlo.");
 			esperar();
 		}
-	}while(c[0]);
+	}while(c[0] != 4);
 	//termina while
     system("clear");
 	return 0;
@@ -96,44 +96,38 @@ int main(void){
 int jugar(struct jugador jug[]){
 	struct tablero tab;
     iniciarTab(&tab);
-    int x=1, i=0, ok=-2;
+    int continuar=1, i=0, ok=-2;
     do{
         for(i=0;i<NJ;i++){
-            /* x=revisarGanador(jug,tab) return 1 continua o 0 termina aqui dentro poner revisión de empate tambien*/
-            if(x){
+            continuar=revisarGanador(jug,tab,i);
+            if(continuar){
                 ok=-2;
                 while(ok==-2){
 	                dibujarTabla(tab,jug);
-                    if(jug[i].num != 3)
+                    if(jug[i].num != NJ+1)
         	            ok=ponerPieza(jug[i],tab);
                     else
-    	                ok=ponerPiezaAI(jug,tab);
-                }
-                if(ok==-1)
+    	                ok=ponerPiezaAI(jug,tab,i);
+                }            
+                if(ok==-1)//si pone 0 el usuario
                     return 0;
                 tab.matriz[tab.cuentaFila[ok]][ok]=jug[i].num;  //poner pieza en su lugar en la matriz
                 tab.cuentaFila[ok]++;   //sumar el contador de fila
+            }else{
+                return 0;
             }        
         }
-    }while(x);
-	dibujarTabla(tab,jug);
-    printf("\n\n\tLo siento, ya se terminaron las oportunidades, juego empatado.");
-    esperar();
+    }while(continuar);
 	return 0;
 }
 //funcion para iniciar estructura jugadores
-struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][3]){
+struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][NJ+1]){
 	int r=-1, i=0;
 	//para poner avatar random
-	if(num==1){
+	do{
 		r=rand()%2;
-		elegir[1][r]=0;
-	}else{
-		if(elegir[1][0])
-			r=0;
-		else
-			r=1;
-	}
+	}while(!elegir[1][r]);
+	elegir[1][r]=0;
 	strcpy(jug->avatar,pieza[r]);
 	//pedir nombre
 	if(c[0]==1 || num==1){
@@ -159,7 +153,8 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 			printf("\n\t\t\tElige un color: ");
 			fflush(stdin);
 			scanf("%d",&r);
-			if(r<1 || r>4){
+		    fflush(stdin);
+			if(r<1 || r>4 || !elegir[0][r-1]){
 				printf("\n\tOpción no valida, vuelve a intentarlo");
 				esperar();
 				r=0;
@@ -167,7 +162,7 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		}
 		elegir[0][r-1]=0;
 	}else{
-        jug->num=3;
+        jug->num=NJ+1;
 		strcpy(jug->nombre,"cpu");
 		do{
 			r=rand()%3+1;
@@ -187,8 +182,8 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 			break;
 	}
 	return *jug;
-}//termina funcion estructura inicar jugador
-struct tablero iniciarTab(struct tablero *tab){
+}//termina funcion inicar jugador
+void iniciarTab(struct tablero *tab){
 	int i=0, j=0;
     for(i=0;i<NC;i++){
 		tab->cuentaFila[i]=0;
@@ -280,37 +275,37 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     esperar();
     return -2;
     }
-int ponerPiezaAI(struct jugador jug[], struct tablero tab)
+int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
 {
     struct escanear escaneado;
-    int dif=jug[1].dificultad;
+    int dif=jug[n].dificultad;
     int col=-1;
-    if(jug[1].num==3)
-        if(dif!=1){
-            escaneado=revisarTab(jug,tab,3);
+    if(jug[n].num==NJ+1)
+        if(dif != 1){
+            escaneado=revisarTab(jug,tab);
             if(escaneado.hay[0])
                 col=escaneado.vacias[0][0][1];
             else if(escaneado.hay[1])
                 col=escaneado.vacias[1][0][1];
             else if(dif==3){
-                revisarTab(jug,tab,3);
+                revisarTab(jug,tab);
                 //hardcore extra
                 col=0;
             }
         }else
             do{
                 col=rand()%NC;
-                printf("\n%d",col);
             }while(tab.cuentaFila[col]>=NF);
+            printf("\n\n\n\n\n\n\n\n\n\n");
     return col;
 }
-struct escanear revisarTab(struct jugador jug[], struct tablero tab, int numABuscar){
+struct escanear revisarTab(struct jugador jug[], struct tablero tab){
     //inicializacion
     struct escanear escaner;
-    escaner.nab=numABuscar;
     int i=0, j=0, k=0, l=0;
     for(;i<NJ;i++){
         escaner.hay[i]=0;
+        escaner.nab[i]=0;
         for(;j<2;j++)
             for(;k<2;k++){
                 escaner.vacias[i][j][k]=0;
@@ -319,7 +314,6 @@ struct escanear revisarTab(struct jugador jug[], struct tablero tab, int numABus
     //matriz de matrices de 4x4        
     for(i=0;i<(NF-N+1);i++)
         for(j=0;j<(NC-N+1);j++){
-            printf("tabla %d, %d",i,j);
             for(k=0;k<N;k++){
                 for(l=0;l<N;l++){
                     escaner.array[i][j][k][l]=tab.matriz[i+k][j+l];
@@ -331,9 +325,36 @@ struct escanear revisarTab(struct jugador jug[], struct tablero tab, int numABus
 
 /* 
 struct escanear{
- 	int nab; //numero a buscar
  	int hay[NJ]; //1 si hay alguna, 0 si no hay.
+ 	int nab[NJ]; //numero encontrado
  	int vacias[NJ][3][2]; //casillas vacias en el primer encuentro-f,c
  	int array[NF-N+1][NC-N+1][N][N];
 };
  */
+
+int revisarGanador(struct jugador jug[],struct tablero tab, int n){
+    struct escanear escaneo;
+    int contador=0;
+    int i=0, j=0;
+    //revisar si alguien ganó 
+    /*
+    escaneo=revisarTab(jug,tab)
+    if(escanear.hay[n] && escanear.nab[n]==4){
+	    dibujarTabla(tab,jug);//meter esto en revisarGanador();
+        printf("\n\n\t\t!!!Felicidades %s has ganado¡¡¡",jug[n].nombre);
+        esperar();
+        return 0;
+    }
+    */
+    //revisar si se lleno la tabla
+    for(i=0;i<NC;i++)
+        if(tab.cuentaFila[i]==NF)
+            contador++;
+    if(contador==NC){
+	    dibujarTabla(tab,jug);//meter esto en revisarGanador();
+        printf("\n\n\tLo siento, ya se terminaron las oportunidades, juego empatado.");
+        esperar();
+        return 0;
+    }
+    return 1;
+} 
