@@ -108,14 +108,14 @@ int jugar(struct jugador jug[]){
             if(continuar){
                 ok=-2;
                 while(ok==-2){
-	            dibujarTabla(tab,jug);
+	                dibujarTabla(tab,jug);
                     if(jug[i].num != NJ+1)
-   		        ok=ponerPieza(jug[i],tab);
+   		                ok=ponerPieza(jug[i],tab);
                     else
     	                ok=ponerPiezaAI(jug,tab,i);
                 }            
-                if(ok==-1)//si pone 0 el usuario
-                    return 0;
+                if(ok==-1)
+                    return 0;//si pone 0 el usuario
                 tab.matriz[tab.cuentaFila[ok]][ok]=jug[i].num;  //poner pieza en su lugar en la matriz
                 tab.cuentaFila[ok]++;   //sumar el contador de fila
             }else{
@@ -281,6 +281,7 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     }else{
         return columna;
     }
+    esperar();
     return -2;
     }
 int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
@@ -348,15 +349,13 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     int contador=0;
     int i=0, j=0;
     //revisar si alguien ganó 
-    /*
-    escaneo=revisarTab(jug,tab)
-    if(escanear.hay[n] && escanear.nab[n]==4){
-	    dibujarTabla(tab,jug);//meter esto en revisarGanador();
+    escaneo=revisarTab(jug,tab);
+    if(escaneo.hay[n] && escaneo.nab[n]==4){
+	    dibujarTabla(tab,jug);
         printf("\n\n\t\t!!!Felicidades %s has ganado¡¡¡",jug[n].nombre);
         esperar();
         return 0;
     }
-    */
     //revisar si se lleno la tabla
     for(i=0;i<NC;i++)
         if(tab.cuentaFila[i]==NF)
