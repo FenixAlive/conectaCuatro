@@ -1,4 +1,3 @@
-//poner en el jugador 2 vs cpu restricciones en el color
 //ver como poner dificultad en otra parte
 //ver porque hay error al escribir una palabra
 //terminar ganador
@@ -109,9 +108,9 @@ int jugar(struct jugador jug[]){
             if(continuar){
                 ok=-2;
                 while(ok==-2){
-	                dibujarTabla(tab,jug);
+	            dibujarTabla(tab,jug);
                     if(jug[i].num != NJ+1)
-        	            ok=ponerPieza(jug[i],tab);
+   		        ok=ponerPieza(jug[i],tab);
                     else
     	                ok=ponerPiezaAI(jug,tab,i);
                 }            
@@ -174,6 +173,7 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		do{
 			r=rand()%3+1;
 		}while(!elegir[0][r-1]);
+		elegir[0][r-1]=0;
 	}
 	switch(r){
 		case 1:
@@ -270,7 +270,9 @@ void esperar(void){
 int ponerPieza(struct jugador jug,struct tablero tab){
     int columna=0;
     printf("\n\n\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.\n\n\t\tElige una columna: ",jug.color,jug.nombre,BLANCO);
+    fflush(stdin);
     scanf("%i",&columna);
+    fflush(stdin);
     columna--;
     if(columna < -1 || columna >= NC){
         printf("\n\n\t\tEl numero que ingresaste no es ninguna columna, elige de nuevo.");
@@ -279,7 +281,6 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     }else{
         return columna;
     }
-    esperar();
     return -2;
     }
 int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
