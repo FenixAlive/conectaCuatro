@@ -32,7 +32,7 @@ struct tablero{
 struct escanear{
  	int hay; //1 si hay alguna, 0 si no hay.
  	int nab; //numero encontrado
- 	int vacias[3]; //casillas vacias en el primer encuentro-f,c
+ 	int vacias[3]; //casillas vacias en el primer encuentro
  	int array[NF-N+1][NC-N+1][N][N];
 };
 //definicion de funciones
@@ -269,7 +269,6 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
     int i=0, lim=3, buscar=3;
     if(jug[n].num==NJ+1){
         if(dif != 1){
-            printf("dif: %d",dif);
             if(dif==3)
                 lim=2;
             do{
@@ -306,7 +305,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
     //inicializacion
     struct escanear escaner;
-    int i[7];//iterador
+    int i[6];//iterador
     int j[3][N];//contador de coincidencias 0=hor, 1=vert, 2=diag
     escaner.hay=0;
     escaner.nab=0;
@@ -394,7 +393,10 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     escaneo=revisarTab(jug[n],tab,4);
     if(escaneo.hay && escaneo.nab==4){
 	    dibujarTabla(tab,jug);
-        printf("\n\n\t\t\t%s!!!Felicidades %s has ganado¡¡¡%s",jug[n].color,jug[n].nombre,BLANCO);
+        if(jug[n].num==NJ+1)
+            printf("\n\n\t\t\t%sLo siento, esta vez te gané, suerte para la proxima%s",jug[n].color,BLANCO);
+        else
+            printf("\n\n\t\t\t%s!!!Felicidades %s has ganado¡¡¡%s",jug[n].color,jug[n].nombre,BLANCO);
         esperar();
         return 0;
     }
