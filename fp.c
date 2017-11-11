@@ -1,11 +1,9 @@
-//ver como poner dificultad en otra parte
 //ver porque hay error al escribir una palabra
-//terminar revisar
+//terminar revisar vertical con 2
 //terminar AI
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 
 //constantes
 #define N 4   //numero para ganar
@@ -16,7 +14,7 @@
 #define BLANCO "\E[m"
 #define CYAN "\E[36m"
 #define ROJO "\E[31m"
-#define AMARILLO "\E[33m" //33 amarillo(es mas anaranjado)
+#define AMARILLO "\E[33m"
 
 //Estructura Jugador
 struct jugador{
@@ -24,7 +22,6 @@ struct jugador{
 	char avatar[7];
 	char nombre[10];
 	char color[7];
-	int dificultad; //ver posibilidad de meter dificultad en estructura general
 };
 //estructura tablero
 struct tablero{
@@ -39,7 +36,7 @@ struct escanear{
  	int array[NF-N+1][NC-N+1][N][N];
 };
 //definicion de funciones
-int jugar(struct jugador jug[]); //funcion principal
+int jugar(struct jugador jug[], int c[]); //funcion principal
 struct jugador iniciarjug(struct jugador *jug,int num, char pieza[NJ][7], int c[],int elegir[2][NJ+1]);//inicializa jugadores
 void iniciarTab(struct tablero *tab);
 void instrucciones(void);
@@ -47,10 +44,11 @@ int menu1(void);
 int menu2(void);
 void dibujarTabla(struct tablero tab, struct jugador jug[]);
 int ponerPieza(struct jugador jug, struct tablero tab);
-int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n);
+int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif);
 struct escanear revisarTab(struct jugador jug, struct tablero tab, int n);
 int revisarGanador(struct jugador jug[],struct tablero tab, int n); 
 void esperar(void);
+void copiar(char a[], char b[]);//a es el nuevo string
 
 ///////Inicio
 //main
@@ -73,7 +71,6 @@ int main(void){
 					esperar();
 					c[1]=menu2();
 				}//si me da un numero invalido en el menu
-                jug[1].dificultad=c[1];//guardar dificultad
             }else{
                 c[1]=0;//estoy en 1 vs 2
             }//fin pedir menu 2
@@ -83,7 +80,7 @@ int main(void){
 					    iniciarjug(&jug[i],i+1,pieza, c,elegir);
 					    ytn[i]=c[0];
 				    }
-				jugar(jug);
+				jugar(jug, c);
 			}
 		}else if(c[0]==3)
 			instrucciones();
@@ -97,7 +94,7 @@ int main(void){
 	return 0;
 }
 ///////////////funcion principal jugar
-int jugar(struct jugador jug[]){
+int jugar(struct jugador jug[], int c[]){
 	struct tablero tab;
     iniciarTab(&tab);
     int continuar=1, i=0, ok=-2;
@@ -110,7 +107,7 @@ int jugar(struct jugador jug[]){
                     if(jug[i].num != NJ+1)
    		                ok=ponerPieza(jug[i],tab);
                     else
-    	                ok=ponerPiezaAI(jug,tab,i);
+    	                ok=ponerPiezaAI(jug,tab,i,c[1]);
                 }            
                 if(ok==-1)
                     return 0;//si pone 0 el usuario
@@ -127,33 +124,28 @@ int jugar(struct jugador jug[]){
 //funcion para iniciar estructura jugadores
 struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][NJ+1]){
 	int r=-1, i=0;
+    char color[3][10]={"1-Rojo","2-Cyan","3-Amarillo"};
+    char pintar[3][7]={ROJO,CYAN,AMARILLO};
 	//para poner avatar random
 	do{
 		r=rand()%2;
 	}while(!elegir[1][r]);
 	elegir[1][r]=0;
-	strcpy(jug->avatar,pieza[r]);
+    copiar(jug->avatar,pieza[r]);
 	//pedir nombre
-	if(c[0]==1 || num==2){ //ver como hacer para poner cpu en 1er lugar sin que haya error
+	if(c[0]==1 || num==2){
 	    jug->num=num;//numero jugador
 		system("clear");
 		printf("\n\n\t\t\tJugador %d",jug->num);
-        printf("\n\n\t!!Hola, antes de comenzar ayudame con lo siguiente: ");
-		printf("\n\n\tElige un nombre: ");
+        printf("\n\n\t!!Hola, antes de comenzar elige un nombre: ");
 		fflush(stdin);
 		scanf("%s",jug->nombre);
 		fflush(stdin);
 		r=0;
 		while(!r){
 			for(i=0;i<3;i++)
-			    if(elegir[0][i]){
-				    if(i==0)
-					    printf("\n\t1-Rojo");
-				    if(i==1)
-					    printf("\n\t2-Cyan");
-				    if(i==2)
-					    printf("\n\t3-Amarillo");
-			    }
+			    if(elegir[0][i])
+                    printf("\n\t%s%s%s",pintar[i],color[i],BLANCO);
 			printf("\n\t\t\tElige un color: ");
 			fflush(stdin);
 			scanf("%i",&r);
@@ -167,26 +159,13 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		elegir[0][r-1]=0;
 	}else{
         jug->num=NJ+1;
-        jug->dificultad=c[1];//ver forma de quitarla
-		strcpy(jug->nombre,"cpu");
+        copiar(jug->nombre,"cpu");
 		do{
 			r=rand()%3+1;
 		}while(!elegir[0][r-1]);
 		elegir[0][r-1]=0;
 	}
-	switch(r){
-		case 1:
-			strcpy(jug->color,ROJO);
-			break;
-		case 2:
-			strcpy(jug->color,CYAN);
-			break;
-		case 3:
-			strcpy(jug->color,AMARILLO);
-			break;
-		default:
-			break;
-	}
+	copiar(jug->color,pintar[r-1]);
 	return *jug;
 }//termina funcion inicar jugador
 void iniciarTab(struct tablero *tab){
@@ -283,10 +262,9 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     esperar();
     return -2;
     }//fin poner pieza
-int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
+int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 {
     struct escanear escaneado;
-    int dif=jug[n].dificultad;
     int col=-1;
     int i=0, lim=3, buscar=3;
     if(jug[n].num==NJ+1){
@@ -407,17 +385,7 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                 }
             }
     return escaner;
-}
-
-/* 
-struct escanear{
- 	int hay; //1 si hay alguna, 0 si no hay.
- 	int nab; //numero encontrado
- 	int vacias[3]; //casillas vacias en el primer encuentro-columna
- 	int array[NF-N+1][NC-N+1][N][N];
-};
- */
-
+}//fin escanear
 int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     struct escanear escaneo;
     int contador=0;
@@ -441,4 +409,11 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
         return 0;
     }
     return 1;
-} 
+} //fin revisar ganador
+void copiar(char a[], char b[]){//a es el nuevo string
+    char n=0;
+   do{
+        a[n]=b[n];
+        n++;
+    }while(b[n-1] != '\0');
+}
