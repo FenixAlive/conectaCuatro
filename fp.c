@@ -34,9 +34,9 @@ struct tablero{
 };
 //estructura escanear talero
 struct escanear{
- 	int hay[NJ]; //1 si hay alguna, 0 si no hay.
- 	int nab[NJ]; //numero encontrado
- 	int vacias[NJ][3][2]; //casillas vacias en el primer encuentro-f,c
+ 	int hay; //1 si hay alguna, 0 si no hay.
+ 	int nab; //numero encontrado
+ 	int vacias[3]; //casillas vacias en el primer encuentro-f,c
  	int array[NF-N+1][NC-N+1][N][N];
 };
 //definicion de funciones
@@ -49,7 +49,7 @@ int menu2(void);
 void dibujarTabla(struct tablero tab, struct jugador jug[]);
 int ponerPieza(struct jugador jug, struct tablero tab);
 int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n);
-struct escanear revisarTab(struct jugador jug[], struct tablero tab);
+struct escanear revisarTab(struct jugador jug, struct tablero tab, int n);
 int revisarGanador(struct jugador jug[],struct tablero tab, int n); 
 void esperar(void);
 
@@ -291,13 +291,11 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
     int col=-1;
     if(jug[n].num==NJ+1){
         if(dif != 1){
-            escaneado=revisarTab(jug,tab);
-            if(escaneado.hay[0])
-                col=escaneado.vacias[0][0][1];
-            else if(escaneado.hay[1])
-                col=escaneado.vacias[1][0][1];
+            escaneado=revisarTab(jug[n],tab,3);
+            if(escaneado.hay)
+                col=escaneado.vacias[0];
             else if(dif==3){
-                revisarTab(jug,tab);
+                revisarTab(jug[n],tab,2);
                 //hardcore extra primero poner en la col 3 revisando si el op tiene 2 seguidas de peligro.
                 col=0;
             }
@@ -311,24 +309,58 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
             printf("\n\n\n\n\n\n\n\n\n\n");
     return col;
 }
-struct escanear revisarTab(struct jugador jug[], struct tablero tab){
+struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
     //inicializacion
     struct escanear escaner;
-    int i=0, j=0, k=0, l=0;
-    for(;i<NJ;i++){
-        escaner.hay[i]=0;
-        escaner.nab[i]=0;
-        for(;j<2;j++)
-            for(;k<2;k++){
-                escaner.vacias[i][j][k]=0;
-            }
-    }
-    //matriz de matrices de 4x4        
-    for(i=0;i<(NF-N+1);i++)
-        for(j=0;j<(NC-N+1);j++){
-            for(k=0;k<N;k++){
-                for(l=0;l<N;l++){
-                    escaner.array[i][j][k][l]=tab.matriz[i+k][j+l];
+    int i[7];//iterador
+    int j[3][N];//contador de coincidencias 0=hor, 1=vert, 2=diag
+    //revisa
+            escaner.hay=0;
+            escaner.nab=0;
+            for(i[0]=0;i[0]<NF-N+1;i[0]++){//fila externa
+                for(i[1]=0;i[1]<NC-N+1;i[1]++){//columna externa
+                    for(i[2]=0;i[2]<3;i[2]++)//inicializar en 0 contador
+                        for(i[3]=0;i[3]<N;i[3]++)
+                            j[i[2]][i[3]]=0;
+                    //contar dentro de los 4 x 4
+                    for(i[2]=0;i[2]<N;i[2]++){//fila interna
+                        for(i[3]=0;i[3]<N;i[3]++){//columna interna
+                            escaner.array[i[0]][i[1]][i[2]][i[3]]=tab.matriz[i[0]+i[2]][i[1]+i[3]];
+                            if(jug.num==tab.matriz[i[0]+i[2]][i[1]+i[3]]){
+                            //si la pieza de la casilla es la del jugador
+                                j[0][i[2]]++;//sumador horizontal
+                                j[1][i[3]]++;//sumador vertical
+                                if(i[2]==i[3])
+                                    j[2][0]++;//diagonal
+                                if(i[2]+i[3]+1==N)
+                                    j[2][1]++;//diagonal invertida
+                            }else if(tab.matriz[i[0]+i[2]][i[1]+i[3]]){
+                            //si la pieza no es la del jugador y no es 0
+                                j[0][i[2]]=N*-1;//sumador horizontal
+                                j[1][i[3]]=N*-1;//sumador vertical
+                                if(i[2]==i[3])
+                                    j[2][0]=N*-1;//diagonal
+                                if(i[2]+i[3]+1==N)
+                                    j[2][1]=N*-1;//diagonal invertida
+                            }
+                    }
+                    //si coincidencias es igual a el numero
+                    for(i[2]=0;i[2]<3;i[2]++)
+                        for(i[3]=0;i[3]<N;i[3]++)
+                            if(j[i[2]][i[3]]==n){
+                                escaner.hay=1;
+                                escaner.nab=n;
+                                i[5]=0;
+                                if(!i[2] || i[2]==2)
+                                    for(i[4]=0;i[4]<N;i[4]++)//columna
+                                        if(!tab.matriz[tab.cuentaFila[i[4]]][i[1]+i[4]]){
+                                            escaner.vacias[i[5]]=i[4];
+                                            i[5]++;
+                                        }
+                                else if(i[2]==1)
+                                            escaner.vacias[0]=i[3];
+                                return escaner;
+                            }    
                 }
             }
         }
@@ -337,9 +369,9 @@ struct escanear revisarTab(struct jugador jug[], struct tablero tab){
 
 /* 
 struct escanear{
- 	int hay[NJ]; //1 si hay alguna, 0 si no hay.
- 	int nab[NJ]; //numero encontrado
- 	int vacias[NJ][3][2]; //casillas vacias en el primer encuentro-f,c
+ 	int hay; //1 si hay alguna, 0 si no hay.
+ 	int nab; //numero encontrado
+ 	int vacias[3]; //casillas vacias en el primer encuentro-columna
  	int array[NF-N+1][NC-N+1][N][N];
 };
  */
@@ -349,8 +381,8 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     int contador=0;
     int i=0, j=0;
     //revisar si alguien ganó 
-    escaneo=revisarTab(jug,tab);
-    if(escaneo.hay[n] && escaneo.nab[n]==4){
+    escaneo=revisarTab(jug[n],tab,4);
+    if(escaneo.hay && escaneo.nab==4){
 	    dibujarTabla(tab,jug);
         printf("\n\n\t\t!!!Felicidades %s has ganado¡¡¡",jug[n].nombre);
         esperar();
