@@ -1,6 +1,5 @@
 //ver como poner dificultad en otra parte
 //ver porque hay error al escribir una palabra
-//terminar ganador
 //terminar revisar
 //terminar AI
 #include <stdio.h>
@@ -283,27 +282,38 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     }
     esperar();
     return -2;
-    }
+    }//fin poner pieza
 int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
 {
     struct escanear escaneado;
     int dif=jug[n].dificultad;
     int col=-1;
+    int i=0, lim=3, buscar=3;
     if(jug[n].num==NJ+1){
         if(dif != 1){
-            escaneado=revisarTab(jug[n],tab,3);
+            printf("dif: %d",dif);
+            if(dif==3)
+                lim=2;
+            do{
+                do{
+                    escaneado=revisarTab(jug[n],tab,buscar);
+                    n++;
+                }while(!escaneado.hay && n<NJ);
+                n=0;
 	    printf("\n\nhay: %d\n",escaneado.hay);
 	    printf("num: %d\n",escaneado.nab);
+                buscar--;
+           }while(!escaneado.hay && buscar>=lim);
+
 	    printf("vacia 1: %d\n",escaneado.vacias[0]);
 	    printf("vacia 2: %d\n",escaneado.vacias[1]);
 	    printf("vacia 3: %d\n",escaneado.vacias[2]);
 	    esperar();
-            if(escaneado.hay)
+            if(escaneado.hay){
                 col=escaneado.vacias[0];
-            else if(dif==3){
-                revisarTab(jug[n],tab,2);
-                //hardcore extra primero poner en la col 3 revisando si el op tiene 2 seguidas de peligro.
-                col=escaneado.vacias[0];
+                if(dif==3){
+                //hardcore extra.
+                }
             }
         }
         if(col==-1){
@@ -320,9 +330,12 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
     struct escanear escaner;
     int i[7];//iterador
     int j[3][N];//contador de coincidencias 0=hor, 1=vert, 2=diag
+    escaner.hay=0;
+    escaner.nab=0;
+    for(i[0]=0;i[0]<N-1;i[0]++){
+        escaner.vacias[i[0]]=0;
+    }
     //revisa
-            escaner.hay=0;
-            escaner.nab=0;
             for(i[0]=0;i[0]<NF-N+1;i[0]++){//fila externa
                 for(i[1]=0;i[1]<NC-N+1;i[1]++){//columna externa
                     for(i[2]=0;i[2]<3;i[2]++)//inicializar en 0 contador
@@ -340,7 +353,7 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                     j[2][0]++;//diagonal
                                 if(i[2]+i[3]+1==N)
                                     j[2][1]++;//diagonal invertida
-                            }else if(tab.matriz[i[0]+i[2]][i[1]+i[3]]){
+                            }else if(tab.matriz[i[0]+i[2]][i[1]+i[3]] || tab.cuentaFila[i[1]+i[3]]!=(i[0]+i[2]) ){
                             //si la pieza no es la del jugador y no es 0
                                 j[0][i[2]]=N*-1;//sumador horizontal
                                 j[1][i[3]]=N*-1;//sumador vertical
@@ -353,20 +366,43 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
 		    }
                     //si coincidencias es igual a el numero
                     for(i[2]=0;i[2]<3;i[2]++)
-                        for(i[3]=0;i[3]<N;i[3]++)
+                        for(i[3]=0;i[3]<N;i[3]++)//posicion dentro del 4x4
                             if(j[i[2]][i[3]]==n){
                                 escaner.hay=1;
                                 escaner.nab=n;
                                 i[5]=0;
-                                if(!i[2] || i[2]==2){
-                                    for(i[4]=0;i[4]<N;i[4]++)//columna
-                                        if(!tab.matriz[tab.cuentaFila[i[4]]][i[1]+i[4]]){
-                                            escaner.vacias[i[5]]=i[4];
+                                if(!i[2]){
+                                    //revision horizontal
+                                    printf("\n horizontal");
+                                    for(i[4]=0;i[4]<N;i[4]++)//columna 
+                                        if(!tab.matriz[i[0]+i[3]][i[1]+i[4]]){
+                                            escaner.vacias[i[5]]=i[1]+i[4];
                                             i[5]++;
                                         }
-				}else if(i[2]==1)
-                                            escaner.vacias[0]=i[3];
-                                return escaner;
+                                }else if(i[2]==1 && tab.cuentaFila[i[0]+i[3]]<NF){
+                                    //revision vertical
+                                    printf("\n vertical");
+                                    escaner.vacias[0]=i[1]+i[3];
+                                }else if(i[2]==2){
+                                    //revision diagonal
+                                    printf("\n diagonal");
+                                    for(i[4]=0;i[4]<N;i[4]++){
+                                        if(!i[3]){//diagonal
+                                            if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
+                                                printf("\n diagonal normal");
+                                                escaner.vacias[i[5]]=i[1]+i[4];
+                                                i[5]++;
+                                            }        
+                                        }else if(i[3]==1){//diagonal invertida
+                                            if(!tab.matriz[i[0]+i[4]][i[1]+(N-1-i[4])] && tab.cuentaFila[i[1]+(N-1-i[4])]==i[0]+i[4]){
+                                                printf("\n diagonal invertida");
+                                                escaner.vacias[i[5]]=i[1]+(N-1-i[4]);
+                                                i[5]++;
+                                            }        
+                                        }
+                                    }
+                                }
+                            return escaner;
                             }    
                 }
             }
@@ -390,7 +426,7 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     escaneo=revisarTab(jug[n],tab,4);
     if(escaneo.hay && escaneo.nab==4){
 	    dibujarTabla(tab,jug);
-        printf("\n\n\t\t!!!Felicidades %s has ganado¡¡¡",jug[n].nombre);
+        printf("\n\n\t\t\t%s!!!Felicidades %s has ganado¡¡¡%s",jug[n].color,jug[n].nombre,BLANCO);
         esperar();
         return 0;
     }
