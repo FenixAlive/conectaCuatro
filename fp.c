@@ -104,7 +104,6 @@ int jugar(struct jugador jug[]){
     int continuar=1, i=0, ok=-2;
     do{
         for(i=0;i<NJ;i++){
-            continuar=revisarGanador(jug,tab,i);
             if(continuar){
                 ok=-2;
                 while(ok==-2){
@@ -121,6 +120,7 @@ int jugar(struct jugador jug[]){
             }else{
                 return 0;
             }        
+            continuar=revisarGanador(jug,tab,i);
         }
     }while(continuar);
 	return 0;
@@ -292,12 +292,18 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab,int n)
     if(jug[n].num==NJ+1){
         if(dif != 1){
             escaneado=revisarTab(jug[n],tab,3);
+	    printf("\n\nhay: %d\n",escaneado.hay);
+	    printf("num: %d\n",escaneado.nab);
+	    printf("vacia 1: %d\n",escaneado.vacias[0]);
+	    printf("vacia 2: %d\n",escaneado.vacias[1]);
+	    printf("vacia 3: %d\n",escaneado.vacias[2]);
+	    esperar();
             if(escaneado.hay)
                 col=escaneado.vacias[0];
             else if(dif==3){
                 revisarTab(jug[n],tab,2);
                 //hardcore extra primero poner en la col 3 revisando si el op tiene 2 seguidas de peligro.
-                col=0;
+                col=escaneado.vacias[0];
             }
         }
         if(col==-1){
@@ -344,6 +350,7 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                     j[2][1]=N*-1;//diagonal invertida
                             }
                     }
+		    }
                     //si coincidencias es igual a el numero
                     for(i[2]=0;i[2]<3;i[2]++)
                         for(i[3]=0;i[3]<N;i[3]++)
@@ -351,19 +358,18 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                 escaner.hay=1;
                                 escaner.nab=n;
                                 i[5]=0;
-                                if(!i[2] || i[2]==2)
+                                if(!i[2] || i[2]==2){
                                     for(i[4]=0;i[4]<N;i[4]++)//columna
                                         if(!tab.matriz[tab.cuentaFila[i[4]]][i[1]+i[4]]){
                                             escaner.vacias[i[5]]=i[4];
                                             i[5]++;
                                         }
-                                else if(i[2]==1)
+				}else if(i[2]==1)
                                             escaner.vacias[0]=i[3];
                                 return escaner;
                             }    
                 }
             }
-        }
     return escaner;
 }
 
