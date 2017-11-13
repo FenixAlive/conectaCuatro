@@ -265,7 +265,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 {
     struct escanear escaneado[NJ*2];
     int col=-1;
-    int i=0, j=0, lim=3, buscar=3;
+    int i=0, j=0, lim=N-1, buscar=N-1;
     if(jug[n].num==NJ+1){
         if(dif != 1){
             if(dif==3)
@@ -280,20 +280,33 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
                 buscar--;
            }while(buscar>=lim);
             //si dificultad intermedia
+            for(i=0;i<NJ;i++){
+                if(escaneado[i].hay && escaneado[i].nab==3){
+	            printf("\nvacia 1: %d",escaneado[i].vacias[0]+1);///////////quitar al final
+                        return escaneado[i].vacias[0];
+        	}
+            }
             if(dif==3){
-	    printf("\nvacia 1: %d",escaneado[i].vacias[0]+1);////////////////////quitar al final
-	    printf("\nvacia 2: %d",escaneado[i].vacias[1]+1);////////////////////quitar al final
-	    printf("\nvacia 3: %d",escaneado[i].vacias[2]+1);////////////////////quitar al final
+		    int conta=0;
+		for(i=2;i<NJ+N-lim;i++){
+		    if(escaneado[i].hay && escaneado[i].nab==3){
+			for(j=0;j<N-1;j++){
+			    if(escaneado[i].vacias[j] != -1){
+	  	  printf("\nvacia %d: %d",j+1,escaneado[i].vacias[j]+1);///////quitar al final
+		  		conta++;
+			    }
+			}
+		    }
+		}
+		if(!conta){
+			i=NC-N;
+			while(i<NC){
+			
+			}
+		}
                 //hardcore extra.
-            }else
-                for(i=0;i<NJ;i++){
-                    if(escaneado[i].hay){
-	                    printf("\nvacia 1: %d",escaneado[i].vacias[0]+1);////////////////////quitar al final
-                        col=escaneado[i].vacias[0];
-                    }
-                }
+            }
     	    esperar();
-        
         }
         if(col==-1){
             do{
