@@ -287,13 +287,14 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
         	}
             }
             if(dif==3){
-		    int conta=0;
+	        int conta=0;
 		for(i=2;i<NJ+N-lim;i++){
-		    if(escaneado[i].hay && escaneado[i].nab==3){
+		    if(escaneado[i].hay && escaneado[i].nab==2){
 			for(j=0;j<N-1;j++){
 			    if(escaneado[i].vacias[j] != -1){
 	  	  printf("\nvacia %d: %d",j+1,escaneado[i].vacias[j]+1);///////quitar al final
 		  		conta++;
+				return escaneado[i].vacias[j];
 			    }
 			}
 		    }
@@ -301,7 +302,10 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 		if(!conta){
 			i=NC-N;
 			while(i<NC){
-			
+			    if(tab.cuentaFila[i]<NF)
+			        return i;
+			    i=(i-NC-N)*(-1)+NC-N;
+			    if(i>=NC-N) i++;
 			}
 		}
                 //hardcore extra.
