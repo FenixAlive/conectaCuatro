@@ -1,5 +1,7 @@
 //ver porque hay error al escribir una palabra
-//terminar AI parte dificil
+//predecir la siguiente pieza para evitar dar la victoria al oponente
+//arreglar vertical con 2 piezas (ver si ayuda o perjudica)
+//hacer que comienze del centro a revisar internamente
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -282,7 +284,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
             //si dificultad intermedia
             for(i=0;i<NJ;i++){
                 if(escaneado[i].hay && escaneado[i].nab==3){
-	                printf("\n enc 2: vacia 1, jug: %d: %d",i+1,escaneado[i].vacias[0]+1);///////////quitar al final
+	                printf("\n enc 3:jug %d, vacia:col %d",i+1,escaneado[i].vacias[0]+1);///////////quitar al final
                     if(col == -1) col= escaneado[i].vacias[0];
         	    }
             }
@@ -292,7 +294,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 		            if(escaneado[i].hay && escaneado[i].nab==2){
 			            for(j=0;j<N-1;j++){
 			                if(escaneado[i].vacias[j] != -1){
-	  	                        printf("\nenc 2: vacia %d: %d",j+1,escaneado[i].vacias[j]+1);///////quitar al final
+	  	                        printf("\nenc 2:jug: %d, vacia %d: %d",i-1,j+1,escaneado[i].vacias[j]+1);///////quitar al final
 		  		                conta++;
 				                if(col == -1 ) col=escaneado[i].vacias[j];
 			                }
@@ -301,9 +303,9 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
 		        }
 		        if(!conta){
 			        i=NC-N;
-			        while(i<NC){
-			            if(tab.cuentaFila[i]<NF)
-			                if(col == -1) col= i;
+			        while(i<NC && col == -1){
+                        if(i==4 && tab.cuentaFila[i]>tab.cuentaFila[2]) col=2;
+                        else if(tab.cuentaFila[i]<NF) col=i;
 			            i=(i-NC+N)*(-1)+NC-N;
 			            if(i>=NC-N) i++;
 			        }
