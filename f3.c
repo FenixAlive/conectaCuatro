@@ -250,16 +250,16 @@ int ponerPieza(struct jugador jug,struct tablero tab){
     int columna=0;
     printf("\n\n\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.\n\n\t\tElige una columna: ",jug.color,jug.nombre,BLANCO);
     fflush(stdin);
-    scanf("%i",&columna);
+    scanf("%i", &columna);
     fflush(stdin);
     columna--;
     if(columna < -1 || columna >= NC){
         printf("\n\n\t\tEl numero que ingresaste no es ninguna columna, elige de nuevo.");
     }else if(tab.cuentaFila[columna] >= NF){
         printf("\n\n\t\tEsa columna esta llena, pero puedes elegir otra.");
-    }else{
+    }else if(columna >-1 || columna < NC){
         return columna;
-    }
+     }
     esperar();
     return -2;
     }//fin poner pieza
@@ -389,7 +389,6 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                         escaner.vacias[0]=i[1]+i[3];
                                     }else if(i[2]==2){
                                     //revision diagonal
-                                        printf("\n diagonal");
                                         for(i[4]=0;i[4]<N;i[4]++){
                                             if(!i[3]){//diagonal
                                                 if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
@@ -423,7 +422,7 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     if(escaneo.hay && escaneo.nab==4){
 	    dibujarTabla(tab,jug);
         if(jug[n].num==NJ+1)
-            printf("\n\n\t\t%sLo siento, esta vez te gané, suerte para la proxima%s",jug[n].color,BLANCO);
+            printf("\n\n\t\t%sEsta vez te gane, suerte para la proxima%s",jug[n].color,BLANCO);
         else
             printf("\n\n\t\t\t%s!!!Felicidades %s has ganado¡¡¡%s",jug[n].color,jug[n].nombre,BLANCO);
         esperar();
@@ -435,7 +434,7 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
             contador++;
     if(contador==NC){
 	    dibujarTabla(tab,jug);
-        printf("\n\n\tLo siento, ya se terminaron las oportunidades, juego empatado.");
+        printf("\n\n\tYa se terminaron las oportunidades, juego empatado.");
         esperar();
         return 0;
     }
