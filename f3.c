@@ -282,33 +282,32 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
             //si dificultad intermedia
             for(i=0;i<NJ;i++){
                 if(escaneado[i].hay && escaneado[i].nab==3){
-	            printf("\nvacia 1: %d",escaneado[i].vacias[0]+1);///////////quitar al final
-                        return escaneado[i].vacias[0];
-        	}
+	                printf("\n enc 2: vacia 1, jug: %d: %d",i+1,escaneado[i].vacias[0]+1);///////////quitar al final
+                    if(col == -1) col= escaneado[i].vacias[0];
+        	    }
             }
             if(dif==3){
-	        int conta=0;
-		for(i=2;i<NJ+N-lim;i++){
-		    if(escaneado[i].hay && escaneado[i].nab==2){
-			for(j=0;j<N-1;j++){
-			    if(escaneado[i].vacias[j] != -1){
-	  	  printf("\nvacia %d: %d",j+1,escaneado[i].vacias[j]+1);///////quitar al final
-		  		conta++;
-				return escaneado[i].vacias[j];
-			    }
-			}
-		    }
-		}
-		if(!conta){
-			i=NC-N;
-			while(i<NC){
-			    if(tab.cuentaFila[i]<NF)
-			        return i;
-			    i=(i-NC-N)*(-1)+NC-N;
-			    if(i>=NC-N) i++;
-			}
-		}
-                //hardcore extra.
+	            int conta=0;
+		        for(i=2;i<NJ+N-lim;i++){
+		            if(escaneado[i].hay && escaneado[i].nab==2){
+			            for(j=0;j<N-1;j++){
+			                if(escaneado[i].vacias[j] != -1){
+	  	                        printf("\nenc 2: vacia %d: %d",j+1,escaneado[i].vacias[j]+1);///////quitar al final
+		  		                conta++;
+				                if(col == -1 ) col=escaneado[i].vacias[j];
+			                }
+			            }
+		            }
+		        }
+		        if(!conta){
+			        i=NC-N;
+			        while(i<NC){
+			            if(tab.cuentaFila[i]<NF)
+			                if(col == -1) col= i;
+			            i=(i-NC+N)*(-1)+NC-N;
+			            if(i>=NC-N) i++;
+			        }
+		        }
             }
     	    esperar();
         }
@@ -376,35 +375,36 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                 if(!i[2]){
                                     //revision horizontal
                                     printf("\n horizontal");
+                    ////////////////////// /
                                     for(i[4]=0;i[4]<N;i[4]++)//columna 
                                         if(!tab.matriz[i[0]+i[3]][i[1]+i[4]]){
                                             escaner.vacias[i[5]]=i[1]+i[4];
                                             i[5]++;
                                         }
-                                }else if(i[2]==1 && tab.cuentaFila[i[0]+i[3]]<NF){
+                                    }else if(i[2]==1 && tab.cuentaFila[i[0]+i[3]]<NF){
                                     //revision vertical
-                                    printf("\n vertical");
-                                    escaner.vacias[0]=i[1]+i[3];
-                                }else if(i[2]==2){
+                                        printf("\n vertical");
+                                        escaner.vacias[0]=i[1]+i[3];
+                                    }else if(i[2]==2){
                                     //revision diagonal
-                                    printf("\n diagonal");
-                                    for(i[4]=0;i[4]<N;i[4]++){
-                                        if(!i[3]){//diagonal
-                                            if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
-                                                printf("\n diagonal normal");
-                                                escaner.vacias[i[5]]=i[1]+i[4];
-                                                i[5]++;
-                                            }        
-                                        }else if(i[3]==1){//diagonal invertida
-                                            if(!tab.matriz[i[0]+i[4]][i[1]+(N-1-i[4])] && tab.cuentaFila[i[1]+(N-1-i[4])]==i[0]+i[4]){
-                                                printf("\n diagonal invertida");
-                                                escaner.vacias[i[5]]=i[1]+(N-1-i[4]);
-                                                i[5]++;
-                                            }        
+                                        printf("\n diagonal");
+                                        for(i[4]=0;i[4]<N;i[4]++){
+                                            if(!i[3]){//diagonal
+                                                if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
+                                                    printf("\n diagonal normal");
+                                                    escaner.vacias[i[5]]=i[1]+i[4];
+                                                    i[5]++;
+                                                }        
+                                            }else if(i[3]==1){//diagonal invertida
+                                                if(!tab.matriz[i[0]+i[4]][i[1]+(N-1-i[4])] && tab.cuentaFila[i[1]+(N-1-i[4])]==i[0]+i[4]){
+                                                    printf("\n diagonal invertida");
+                                                    escaner.vacias[i[5]]=i[1]+(N-1-i[4]);
+                                                    i[5]++;
+                                                }        
+                                            }
                                         }
                                     }
-                                }
-                            return escaner;
+                                return escaner;
                             }//fin if se encuentra n    
                 }//fin fila externa
             i[1]=(i[1]-ce)*(-1)+ce;
