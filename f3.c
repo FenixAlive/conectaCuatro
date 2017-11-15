@@ -1,6 +1,6 @@
-//ver porque hay error al escribir una palabra
-//predecir la siguiente pieza para evitar dar la victoria al oponente
-//hacer que comienze del centro a revisar internamente
+//quitar 303 y 313
+//predecir la siguiente pieza para evitar dar la victoria al oponente *extra
+//hacer que comienze del centro a revisar diagonales-ver conveniencia
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -38,7 +38,7 @@ struct escanear{
 };
 //definicion de funciones
 int jugar(struct jugador jug[], int c[]); //funcion principal
-struct jugador iniciarjug(struct jugador *jug,int num, char pieza[NJ][7], int c[],int elegir[2][NJ+1]);//inicializa jugadores
+void iniciarjug(struct jugador *jug,int num, char pieza[NJ][7], int c[],int elegir[2][NJ+1]);//inicializa jugadores
 void iniciarTab(struct tablero *tab);
 void instrucciones(void);
 int menu1(void);
@@ -115,7 +115,7 @@ int jugar(struct jugador jug[], int c[]){
                 tab.matriz[tab.cuentaFila[ok]][ok]=jug[i].num;  //poner pieza en su lugar en la matriz
                 tab.cuentaFila[ok]++;   //sumar el contador de fila
             }else{
-                return 0;
+               return 0;
             }        
             continuar=revisarGanador(jug,tab,i);
         }
@@ -123,7 +123,7 @@ int jugar(struct jugador jug[], int c[]){
 	return 0;
 }
 //funcion para iniciar estructura jugadores
-struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][NJ+1]){
+void iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][NJ+1]){
 	int r=-1, i=0;
     char color[3][10]={"1-Rojo","2-Cyan","3-Amarillo"};
     char pintar[3][7]={ROJO,CYAN,AMARILLO};
@@ -170,7 +170,6 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 		elegir[0][r-1]=0;
 	}
 	copiar(jug->color,pintar[r-1]);
-	return *jug;
 }//termina funcion inicar jugador
 void iniciarTab(struct tablero *tab){
 	int i=0, j=0;
@@ -217,8 +216,7 @@ int menu2(void){
 void instrucciones(void){
 	system("clear");
     margen(M);
-	printf("\n\n\t\t\tReglas del Juego\n\n\t-El objetivo del juego es alinear cuatro fichas sobre un tablero\n\t formado por seis filas y siete columnas.\n\n\t-Cada uno de los dos jugadores dispone de 21 fichas de color.\n\n\t-Por turnos, los jugadores deben introducir una ficha en la\n\t columna que prefieran (siempre que no esté llena) y ésta\n\t no caerá, sino que se mantendrá en la parte mas alta disponible.\n\n\t-Gana la partida el primero que consiga alinear cuatro fichas\n\t consecutivas en horizontal, vertical o diagonal.\n\n\t-Si todas las columnas estan llenas y nadie ha hecho una fila válida, \n\t entonces hay un empate.");
-    margen(M);
+	printf("\n\n\t\t\tReglas del Juego\n\n\t-El objetivo del juego es alinear cuatro fichas sobre un tablero\n\t formado por seis filas y siete columnas.\n\n\t-Cada uno de los dos jugadores dispone de 21 fichas de color.\n\n\t-Por turnos, los jugadores deben introducir una ficha en la\n\t columna que prefieran (siempre que no esté llena) y ésta\n\t no caerá, sino que se mantendrá en la parte mas alta disponible.\n\n\t-Gana la partida el primero que consiga alinear cuatro fichas\n\t consecutivas en horizontal, vertical o diagonal.\n\n\t-Si todas las columnas estan llenas y nadie ha hecho una fila\n\t válida, entonces hay un empate.");
 	esperar();
 }//fin instrucciones
 void dibujarTabla(struct tablero tabla,struct jugador jug[]){
@@ -261,19 +259,20 @@ void esperar(void){
 	getchar();
 }//fin esperar
 int ponerPieza(struct jugador jug,struct tablero tab){
-    int columna=0;
+    int columna=-1;
     margen(M);
     printf("\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.",jug.color,jug.nombre,BLANCO);
     margen(M);
     printf("\n\t\tElige una columna: ");
     fflush(stdin);
     scanf("%i", &columna);
+    fflush(stdin);
     columna--;
     if(columna < -1 || columna >= NC){
         printf("\n\n\t\tEl numero que ingresaste no es ninguna columna, elige de nuevo.");
     }else if(tab.cuentaFila[columna] >= NF){
         printf("\n\n\t\tEsa columna esta llena, pero puedes elegir otra.");
-    }else if(columna >-1 || columna < NC){
+    }else if(columna >-2 && columna < NC){
         return columna;
      }
     esperar();
@@ -392,29 +391,28 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                 i[5]=0;
                                 if(!i[2]){
                                     //revision horizontal
-                                    printf("\n horizontal");
-                    ////////////////////// /
-                                    for(i[4]=0;i[4]<N;i[4]++)//columna 
+                                    i[4]=ci;
+                                    while(i[4]>-1){//columna interna
                                         if(!tab.matriz[i[0]+i[3]][i[1]+i[4]]){
                                             escaner.vacias[i[5]]=i[1]+i[4];
                                             i[5]++;
                                         }
-                                    }else if(i[2]==1 && tab.cuentaFila[i[0]+i[3]]<NF){
+                                        i[4]=(i[4]-ci)*(-1)+ci;
+                                        if(i[4]>=ci) i[4]++;
+                                    }
+                                }else if(i[2]==1 && tab.cuentaFila[i[1]+i[3]]<NF){
                                     //revision vertical
-                                        printf("\n vertical");
                                         escaner.vacias[0]=i[1]+i[3];
                                     }else if(i[2]==2){
                                     //revision diagonal
                                         for(i[4]=0;i[4]<N;i[4]++){
                                             if(!i[3]){//diagonal
                                                 if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
-                                                    printf("\n diagonal normal");/////////quitar al final
                                                     escaner.vacias[i[5]]=i[1]+i[4];
                                                     i[5]++;
                                                 }        
                                             }else if(i[3]==1){//diagonal invertida
                                                 if(!tab.matriz[i[0]+i[4]][i[1]+(N-1-i[4])] && tab.cuentaFila[i[1]+(N-1-i[4])]==i[0]+i[4]){
-                                                    printf("\n diagonal invertida");///////quitar al final
                                                     escaner.vacias[i[5]]=i[1]+(N-1-i[4]);
                                                     i[5]++;
                                                 }        
