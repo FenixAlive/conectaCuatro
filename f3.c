@@ -1,6 +1,5 @@
 //ver porque hay error al escribir una palabra
 //predecir la siguiente pieza para evitar dar la victoria al oponente
-//arreglar vertical con 2 piezas (ver si ayuda o perjudica)
 //hacer que comienze del centro a revisar internamente
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +11,7 @@
 #define NF 6  //numero de filas
 #define NC 7  //numero de columnas
 #define OP 21 //oportunidades del jugador
+#define M 67 //margen
 #define BLANCO "\E[m"
 #define CYAN "\E[36m"
 #define ROJO "\E[31m"
@@ -50,7 +50,7 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n);
 int revisarGanador(struct jugador jug[],struct tablero tab, int n); 
 void esperar(void);
 void copiar(char a[], char b[]);//a es el nuevo string
-
+void margen(int tam);
 ///////Inicio
 //main
 int main(void){
@@ -137,7 +137,9 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 	if(c[0]==1 || num==2){
 	    jug->num=num;//numero jugador
 		system("clear");
-		printf("\n\n\t\t\tJugador %d",jug->num);
+        margen(M);
+		printf("\n\n\t\t\t\tJugador %d",jug->num);
+        margen(M);
         printf("\n\n\t!!Hola, antes de comenzar elige un nombre: ");
 		fflush(stdin);
 		scanf("%s",jug->nombre);
@@ -152,6 +154,7 @@ struct jugador iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[
 			scanf("%i",&r);
 		    fflush(stdin);
 			if(r<1 || r>4 || !elegir[0][r-1]){
+                margen(M);
 				printf("\n\tOpción no valida, vuelve a intentarlo");
 				esperar();
 				r=0;
@@ -180,13 +183,16 @@ void iniciarTab(struct tablero *tab){
 int menu1(void){
 	int r=0;
 	system("clear");
-	printf("\n\n\t\tCUATRO EN LINEA, GRAVEDAD CERO \n\n");
-	printf("\t\t\tModo de Juego\n\n");
-	printf("\t\t 1) Jugador 1 vs Jugador 2. \n");
-	printf("\t\t 2) Jugador 1 vs Computadora. \n");
-	printf("\t\t 3) Instrucciones de Juego. \n");
-	printf("\t\t 4) Salir. \n\n");
-	printf("\t\t\tElige una opción: ");
+    margen(M);
+	printf("\n\n\t\t\tCUATRO EN LINEA, GRAVEDAD CERO \n");
+    margen(M);
+	printf("\n\t\t\t\tModo de Juego\n\n");
+	printf("\t\t\t 1) Jugador 1 vs Jugador 2. \n");
+	printf("\t\t\t 2) Jugador 1 vs Computadora. \n");
+	printf("\t\t\t 3) Instrucciones de Juego. \n");
+	printf("\t\t\t 4) Salir. \n\n");
+    margen(M);
+	printf("\n\t\t\t\tElige una opción: ");
 	fflush(stdin);
 	scanf("%d",&r);
 	return r;
@@ -194,27 +200,34 @@ int menu1(void){
 int menu2(void){
 	int r2=0;
 	system("clear");
-	printf("\n\n\t\tCUATRO EN LINEA, GRAVEDAD CERO \n\n");
-	printf("\t\t\tNivel de Dificultad:\n\n");
-	printf("\t\t 1) Nivel Fácil. \n");
-	printf("\t\t 2) Nivel Intermedio. \n");
-	printf("\t\t 3) Nivel Difícil. \n");
-	printf("\t\t 4) Regresar. \n\n");
-	printf("\t\t\tElige una opción: ");
+    margen(M);
+	printf("\n\n\t\t\tCUATRO EN LINEA, GRAVEDAD CERO \n");
+    margen(M);
+	printf("\n\t\t\t\tNivel de Dificultad:\n\n");
+	printf("\t\t\t 1) Nivel Fácil. \n");
+	printf("\t\t\t 2) Nivel Intermedio. \n");
+	printf("\t\t\t 3) Nivel Difícil. \n");
+	printf("\t\t\t 4) Regresar. \n\n");
+    margen(M);
+	printf("\n\t\t\t\tElige una opción: ");
 	fflush(stdin);
 	scanf("%d",&r2);
 	return r2;
 }//fin menu 2
 void instrucciones(void){
 	system("clear");
+    margen(M);
 	printf("\n\n\t\t\tReglas del Juego\n\n\t-El objetivo del juego es alinear cuatro fichas sobre un tablero\n\t formado por seis filas y siete columnas.\n\n\t-Cada uno de los dos jugadores dispone de 21 fichas de color.\n\n\t-Por turnos, los jugadores deben introducir una ficha en la\n\t columna que prefieran (siempre que no esté llena) y ésta\n\t no caerá, sino que se mantendrá en la parte mas alta disponible.\n\n\t-Gana la partida el primero que consiga alinear cuatro fichas\n\t consecutivas en horizontal, vertical o diagonal.\n\n\t-Si todas las columnas estan llenas y nadie ha hecho una fila válida, \n\t entonces hay un empate.");
+    margen(M);
 	esperar();
 }//fin instrucciones
 void dibujarTabla(struct tablero tabla,struct jugador jug[]){
         int i=0, j=0, k=0;
         //dibujar tabla
         system("clear");
-        printf("\n\n\t\t\tCUATRO EN LINEA, GRAVEDAD CERO\n\n");
+        margen(M);
+        printf("\n\t\t\tCUATRO EN LINEA, GRAVEDAD CERO\n");
+        margen(M);
         printf("\t\t");
         for(i=0;i<NC;i++)
             printf(" _____");
@@ -241,17 +254,20 @@ void dibujarTabla(struct tablero tabla,struct jugador jug[]){
         }
 }//fin dibujar tabla
 void esperar(void){
-    printf("\n\n\t\tPresiona cualquier tecla para continuar: ");
+    margen(M);
+    printf("\n\t\tPresiona cualquier tecla para continuar: ");
 	fflush(stdin);
 	getchar();
 	getchar();
 }//fin esperar
 int ponerPieza(struct jugador jug,struct tablero tab){
     int columna=0;
-    printf("\n\n\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.\n\n\t\tElige una columna: ",jug.color,jug.nombre,BLANCO);
+    margen(M);
+    printf("\n\t\t\t\tTu Turno %s%s%s\n\n\t\tPuedes presionar 0 en cualquier momento para salir.",jug.color,jug.nombre,BLANCO);
+    margen(M);
+    printf("\n\t\tElige una columna: ");
     fflush(stdin);
     scanf("%i", &columna);
-    fflush(stdin);
     columna--;
     if(columna < -1 || columna >= NC){
         printf("\n\n\t\tEl numero que ingresaste no es ninguna columna, elige de nuevo.");
@@ -283,7 +299,7 @@ int ponerPiezaAI(struct jugador jug[], struct tablero tab, int n, int dif)
            }while(buscar>=lim);
             //si dificultad intermedia
             for(i=0;i<NJ;i++){
-                if(escaneado[i].hay && escaneado[i].nab==3){
+                if(escaneado[i].hay && escaneado[i].nab==3 && escaneado[i].vacias[0] != -1){
 	                printf("\n enc 3:jug %d, vacia:col %d",i+1,escaneado[i].vacias[0]+1);///////////quitar al final
                     if(col == -1) col= escaneado[i].vacias[0];
         	    }
@@ -392,13 +408,13 @@ struct escanear revisarTab(struct jugador jug, struct tablero tab, int n){
                                         for(i[4]=0;i[4]<N;i[4]++){
                                             if(!i[3]){//diagonal
                                                 if(!tab.matriz[i[0]+i[4]][i[1]+i[4]] && tab.cuentaFila[i[1]+i[4]]==i[0]+i[4]){
-                                                    printf("\n diagonal normal");
+                                                    printf("\n diagonal normal");/////////quitar al final
                                                     escaner.vacias[i[5]]=i[1]+i[4];
                                                     i[5]++;
                                                 }        
                                             }else if(i[3]==1){//diagonal invertida
                                                 if(!tab.matriz[i[0]+i[4]][i[1]+(N-1-i[4])] && tab.cuentaFila[i[1]+(N-1-i[4])]==i[0]+i[4]){
-                                                    printf("\n diagonal invertida");
+                                                    printf("\n diagonal invertida");///////quitar al final
                                                     escaner.vacias[i[5]]=i[1]+(N-1-i[4]);
                                                     i[5]++;
                                                 }        
@@ -421,10 +437,13 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
     escaneo=revisarTab(jug[n],tab,4);
     if(escaneo.hay && escaneo.nab==4){
 	    dibujarTabla(tab,jug);
-        if(jug[n].num==NJ+1)
+        if(jug[n].num==NJ+1){
+            margen(M);
             printf("\n\n\t\t%sEsta vez te gane, suerte para la proxima%s",jug[n].color,BLANCO);
-        else
+        }else{
+            margen(M);
             printf("\n\n\t\t\t%s!!!Felicidades %s has ganado¡¡¡%s",jug[n].color,jug[n].nombre,BLANCO);
+        }
         esperar();
         return 0;
     }
@@ -434,6 +453,7 @@ int revisarGanador(struct jugador jug[],struct tablero tab, int n){
             contador++;
     if(contador==NC){
 	    dibujarTabla(tab,jug);
+        margen(M);
         printf("\n\n\tYa se terminaron las oportunidades, juego empatado.");
         esperar();
         return 0;
@@ -446,4 +466,11 @@ void copiar(char a[], char b[]){//a es el nuevo string
         a[n]=b[n];
         n++;
     }while(b[n-1] != '\0');
+}
+void margen(int tam){
+    int i=0;
+    printf("\n\t");
+    for(i=0;i<tam;i++)
+        printf("_");
+    printf("\n");
 }
