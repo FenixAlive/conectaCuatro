@@ -253,7 +253,7 @@ void dibujarTabla(struct tablero tabla,struct jugador jug[]){
 }//fin dibujar tabla
 void esperar(void){
     margen(M);
-    printf("\n\t\tPresiona cualquier tecla para continuar: ");
+    printf("\n\t\tPresiona enter para continuar: ");
 	fflush(stdin);
 	getchar();
 	getchar();
