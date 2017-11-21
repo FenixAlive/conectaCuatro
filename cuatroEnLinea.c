@@ -2,7 +2,7 @@
  *  
  *  Elaborado por: Luis Angel Muñoz Franco
  *  Versión para sistemas Linux
- *  Programa: Juego Conecta Cuatro Gravedad Cero
+ *  Programa: Juego Cuatro en Linea Gravedad Cero
  *
  */
 //cabeceras
@@ -128,7 +128,7 @@ int jugar(struct jugador jug[], int c[]){
 //funcion para iniciar estructura jugadores
 void iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int elegir[2][NJ+1]){
 	int r=-1, i=0;
-    char color[3][10]={"1-Rojo","2-Cyan","3-Amarillo"};
+    char color[3][11]={"1-Rojo","2-Cyan","3-Amarillo"};
     char pintar[3][7]={ROJO,CYAN,AMARILLO};
 	//para poner avatar random
 	do{
@@ -148,11 +148,12 @@ void iniciarjug(struct jugador *jug, int num, char pieza[2][7], int c[], int ele
 		scanf("%s",jug->nombre);
 		fflush(stdin);
 		r=0;
+    margen(M);
 		while(!r){
 			for(i=0;i<3;i++)
 			    if(elegir[0][i])
                     printf("\n\t%s%s%s",pintar[i],color[i],BLANCO);
-			printf("\n\t\t\tElige un color: ");
+			printf("\n\n\tQue numero de las opciones de color prefieres: ");
 			fflush(stdin);
 			scanf("%i",&r);
 		    fflush(stdin);
